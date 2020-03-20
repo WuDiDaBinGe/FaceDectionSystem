@@ -1,0 +1,2 @@
+QLabel#label_info{font-family: "Î¢ÈíÑÅºÚ";margin-left: 20px;margin-top: 10px;}
+QLineEdit#no_border_lineEdit{border: none}

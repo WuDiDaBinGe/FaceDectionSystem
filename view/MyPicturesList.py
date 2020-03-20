@@ -32,6 +32,9 @@ class MyPicturesListWidget(QWidget):
         # 读取缩略图
         files = os.listdir(pictures_path)
         for f1 in files:
+            type_class=f1.split('.')[-1]
+            if type_class not in ['jpg','png']:
+                continue
             path=os.path.join(pictures_path,f1)
             pix1 = QPixmap(path)
             item1 = QListWidgetItem(QIcon(pix1.scaled(self.img_w, self.img_h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)),

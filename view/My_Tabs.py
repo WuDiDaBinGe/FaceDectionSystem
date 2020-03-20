@@ -6,9 +6,6 @@ from PyQt5.QtWidgets import *
 class MyTabs(QTabWidget):
     def __init__(self,parent=None):
         super(MyTabs, self).__init__(parent)
-        self.frame_save_path=''
-        self.video_in_path=''
-        self.input_pictures_path=''
 
         # 创建选项卡小控件窗口
         self.tab_input_video=QWidget()
@@ -18,14 +15,14 @@ class MyTabs(QTabWidget):
         self.tab_model_select=QWidget()
         # 将选项卡添加到顶层窗口中
         self.addTab(self.tab_input_video, "输入视频")
-        self.addTab(self.tab_input_pictures, "输入图片")
         self.addTab(self.tab_split_videos, "分割视频")
+        self.addTab(self.tab_input_pictures, "输入图片")
         self.addTab(self.tab_extract_pictures,"提取人脸")
         self.addTab(self.tab_model_select,"模型选择")
         # 每个选项卡自定义的内容
         self.Input_Video_UI()
-        self.Input_Pictures_UI()
         self.Split_Videos_UI()
+        self.Input_Pictures_UI()
         self.Extract_Pictures_UI()
         self.Model_Select_UI()
         # 动作控件关联
@@ -77,12 +74,12 @@ class MyTabs(QTabWidget):
         hbox_out.addWidget(self.line_outresult__file_path)
         hbox_out.setStretchFactor(self.line_outresult__file_path, 8)
 
-        #表单布局添加控件
+        # 表单布局添加控件
         layout.addRow(QLabel('选择图片地址'),hbox_input)
         layout.addRow('预测结果输出地址',hbox_out)
 
-        #设置标题与布局
-        self.setTabText(1,'输入图片')
+        # 设置标题与布局
+        self.setTabText(2,'输入图片')
         self.tab_input_pictures.setLayout(layout)
 
     def Split_Videos_UI(self):
@@ -124,7 +121,7 @@ class MyTabs(QTabWidget):
         hbox.addLayout(form_layout_right)
         hbox.addStretch(1)
         # 设置小标题与布局方式
-        self.setTabText(2,'分割视频')
+        self.setTabText(1,'分割视频')
         self.tab_split_videos.setLayout(hbox)
     def Extract_Pictures_UI(self):
         # 水平布局
@@ -181,6 +178,7 @@ class MyTabs(QTabWidget):
         self.btn_in_video.clicked.connect(self.select_in_video)
         self.btn_frame_save_path.clicked.connect(self.select_frame_save_path)
         self.btn_save_newpic_path.clicked.connect(self.select_extract_pictures)
+
     def select_in_video(self):
         video_in=QFileDialog.getOpenFileName(self,'选择视频','./','*.mp4')
         self.video_in_path = video_in[0]

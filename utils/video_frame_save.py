@@ -1,4 +1,3 @@
-import numpy as np
 import cv2
 import os
 import dlib
@@ -111,6 +110,9 @@ def extract_faces_from_pictures(pics_path,out_path,pic_width=None,pic_height=Non
     count=0
     for f in files:
         pic_name=f.split('.')[0]
+        pic_type=f.split('.')[-1]
+        if pic_type  not in ['jpg','png']:
+            continue
         path=os.path.join(pics_path,f)
         picture=cv2.imread(path)
         f_height, f_width = picture.shape[:2]
@@ -126,8 +128,9 @@ def extract_faces_from_pictures(pics_path,out_path,pic_width=None,pic_height=Non
             print(face.shape)
             # 将frame 保存到指定的路径下
             cv2.imwrite(out_path + '/' + pic_name + '_face.jpg',face)
-        count=count+1
+            count=count+1
     return count
+
 if __name__ =='__main__':
     video_to_frame(srcvideo_path,dstframe_path,interval,50,100)
 

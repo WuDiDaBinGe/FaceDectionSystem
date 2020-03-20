@@ -184,9 +184,9 @@ class MainWin(QMainWindow):
     def start_btn_changed_slot(self):
         self.btn_Start.disconnect()
         index=self.tabs_top.currentIndex()
-        if index==1:
+        if index==2:
             self.btn_Start.clicked.connect(self.showPictures)
-        elif index==2:
+        elif index==1:
             self.btn_Start.clicked.connect(self.spilt_video)
 
         elif index==3:

@@ -1,4 +1,5 @@
 import os
+accept_pictures_type=['jpg','JPG','png','PNG']
 
 video_in_info='''视频读取完成！
 视频文件名称：{}
@@ -12,7 +13,7 @@ detect_video_info='''正在检测视频中.....
 '''
 predict_pictures_info='''预测图片
 图片路径：{}
-模型路径：{}
+图片名称：{} 预测结果：{}
 进度：{}/{}
 '''
 

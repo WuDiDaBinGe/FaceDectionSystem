@@ -14,6 +14,7 @@ class MyTabs(QTabWidget):
         self.out_result_path=None
         self.pics_extract_path=None
 
+        self.textline_validator=QIntValidator(0,10000)
 
         # 创建选项卡小控件窗口
         self.tab_input_video=QWidget()
@@ -88,8 +89,14 @@ class MyTabs(QTabWidget):
 
         # 第一列参数
         self.textline_start_frame=QLineEdit()
+        self.textline_start_frame.setPlaceholderText('(选填)默认0')
+        self.textline_start_frame.setValidator(self.textline_validator)
         self.textline_end_frame=QLineEdit()
+        self.textline_end_frame.setPlaceholderText('(选填)默认总帧数')
+        self.textline_end_frame.setValidator(self.textline_validator)
         self.textline_interval_frame=QLineEdit()
+        self.textline_interval_frame.setPlaceholderText('(选填)默认1')
+        self.textline_interval_frame.setValidator(self.textline_validator)
 
         form_layout_left.addRow('开始分割帧数',self.textline_start_frame)
         form_layout_left.addRow('结束分割帧数', self.textline_end_frame)
@@ -97,8 +104,11 @@ class MyTabs(QTabWidget):
 
         # 第二列参数
         self.textline_frame_width=QLineEdit()
+        self.textline_frame_width.setPlaceholderText('(选填)系统自适应')
+        self.textline_frame_width.setValidator(self.textline_validator)
         self.textline_frame_height=QLineEdit()
-
+        self.textline_frame_height.setPlaceholderText('(选填)系统自适应')
+        self.textline_frame_height.setValidator(self.textline_validator)
 
         form_layout_mid.addRow('帧宽度',self.textline_frame_width)
         form_layout_mid.addRow('帧高度', self.textline_frame_height)
@@ -127,7 +137,11 @@ class MyTabs(QTabWidget):
         form_layout_1=QFormLayout()
 
         self.textline_newpic_width=QLineEdit()
+        self.textline_newpic_width.setPlaceholderText('(选填)系统自适应')
+        self.textline_newpic_width.setValidator(self.textline_validator)
         self.textline_newpic_height = QLineEdit()
+        self.textline_newpic_height.setPlaceholderText('(选填)系统自适应')
+        self.textline_newpic_height.setValidator(self.textline_validator)
 
         self.btn_save_newpic_path = QPushButton('选择保存路径..')
         self.label_save_newpic_path = QLabel()
@@ -139,8 +153,8 @@ class MyTabs(QTabWidget):
         hbox_input.addWidget(self.label_save_newpic_path)
         hbox_input.setStretchFactor(self.label_save_newpic_path, 8)
 
-        form_layout_1.addRow('生成图片的高', self.textline_newpic_width)
-        form_layout_1.addRow('生成图片的宽', self.textline_newpic_height)
+        form_layout_1.addRow('生成图片的宽', self.textline_newpic_width)
+        form_layout_1.addRow('生成图片的高', self.textline_newpic_height)
         form_layout_1.addRow('选择保存路径', hbox_input)
         layout.addLayout(form_layout_1)
         layout.addStretch(1)

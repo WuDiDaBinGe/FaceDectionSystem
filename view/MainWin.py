@@ -16,7 +16,12 @@ class MainWin(QMainWindow):
         self.initUI()
 
         self.action_widget_associate()
-        self.split_thread=None
+        # 先定义线程
+        self.split_thread=SplitVideoThreads.SplitVideoThreads()
+        self.predict_pics_thread=PredictPicturesThread.PredictPicturesThread()
+        self.extract_pictures_thread=ExtractPicFaceThread.ExtractPicFacesThread()
+        self.detect_video_thread=DetectVideoThread.DetectVideoThread()
+
     def initUI(self):
         self.tabs_top=MyTabs(self)
         self.tabs_top.setObjectName('top_table')
@@ -51,7 +56,6 @@ class MainWin(QMainWindow):
         hbox_mid.addLayout(vbox_mid_right)
         hbox_mid.setStretchFactor(vbox_mid_right,7)
 
-
         self.btn_Start=QPushButton("开始",self)
         self.btn_Stop=QPushButton("停止",self)
         hbox_bottom=QHBoxLayout()
@@ -67,7 +71,6 @@ class MainWin(QMainWindow):
         vbox_main.addLayout(hbox_bottom)
         vbox_main.setStretchFactor(hbox_bottom,1)
 
-
         center_widget = QWidget()
         center_widget.setLayout(vbox_main)
         self.setCentralWidget(center_widget)
@@ -82,6 +85,7 @@ class MainWin(QMainWindow):
         self.tabs_top.line_in_video_path.textChanged.connect(self.update_info_invideo)
         self.tabs_top.currentChanged.connect(self.start_btn_changed_slot)
         self.tabs_top.group_ways.buttonClicked.connect(self.ways_clicked)
+        self.btn_Stop.clicked.connect(self.StopThread)
     def useQss(self):
         with open('MainWin.qss') as file:
             str = file.readlines()
@@ -105,14 +109,15 @@ class MainWin(QMainWindow):
 
     def showPictures(self):
         self.pictures_file_path = self.tabs_top.input_pictures_path
-        if self.pictures_file_path:
+        if self.pictures_file_path is not None:
             self.list_pictures.update(self.pictures_file_path)
         else:
-            print(self.pictures_file_path)
+            QMessageBox.information(self, '请检查', '输入图片路径不能为空！')
 
     def spilt_video(self):
         video_src_path=self.tabs_top.video_in_path
         frame_save_path=self.tabs_top.frame_save_path
+        print(frame_save_path)
         if video_src_path is not None and frame_save_path is not None:
             start_frame = self.tabs_top.textline_start_frame.text()
             if start_frame=='':
@@ -121,8 +126,9 @@ class MainWin(QMainWindow):
                 start_frame=int(start_frame)
 
             end_frame = self.tabs_top.textline_end_frame.text()
+            total_frame=tools.get_video_total_frame(video_src_path)
             if end_frame=='':
-                end_frame=tools.get_video_total_frame(video_src_path)
+                end_frame=total_frame
             else:
                 end_frame=int(end_frame)
 
@@ -131,6 +137,13 @@ class MainWin(QMainWindow):
                 interval=1
             else:
                 interval=int(interval)
+
+            if end_frame>total_frame:
+                QMessageBox.information(self, '请检查', '结束帧不能大于视频的总帧数！')
+                return
+            elif interval>total_frame:
+                QMessageBox.information(self, '请检查', '间隔帧数不能大于总帧数！')
+                return
 
             frame_width = self.tabs_top.textline_frame_width.text()
             if frame_width=='':
@@ -154,7 +167,7 @@ class MainWin(QMainWindow):
             self.label_info.setText("正在分割视频中....")
             self.label_info.adjustSize()
         else:
-            QMessageBox.information(self, '提示', '输入输出路径不能为空！')
+            QMessageBox.information(self, '请检查', '视频路径/保存帧路径不能为空！')
 
     def detect_video(self):
         video_src_path = self.tabs_top.video_in_path
@@ -182,7 +195,7 @@ class MainWin(QMainWindow):
             self.label_info.adjustSize()
 
         else:
-            QMessageBox.information(self, '提示', '输入输出路径不能为空！')
+            QMessageBox.information(self, '请检查', '输入/输出视频和模型路径不能为空！')
 
     def split_video_info(self,num):
         self.label_info.setText('一共分割了{}张图片'.format(num))
@@ -217,7 +230,7 @@ class MainWin(QMainWindow):
             self.label_info.setText("正在提取图片中....")
             self.label_info.adjustSize()
         else:
-            QMessageBox.information(self, '提示', '输入输出路径不能为空！')
+            QMessageBox.information(self, '请检查', '输入图片/输出图片路径不能为空！')
 
     def extract_pictures_info(self,num):
         self.label_info.setText('一共分割了{}张图片'.format(num))
@@ -233,22 +246,27 @@ class MainWin(QMainWindow):
             self.predict_pics_thread.piedict_pictures_finished.connect(self.predict_pictures_info)
             self.predict_pics_thread.start()
         else:
-            QMessageBox.information(self, '提示', '输入/输出/模型/路径不能为空！')
+            QMessageBox.information(self, '请检查', '输入图片/输出预测结果文件/模型路径不能为空！')
+
     def predict_pictures_info(self,info):
         pics_src_path = self.tabs_top.input_pictures_path
-        model_path = self.tabs_top.model_path
+        info_dict=eval(info)
+
         files=os.listdir(pics_src_path)
         total=len(files)
-        self.label_info.setText(cons_value.predict_pictures_info.format(pics_src_path,model_path,info,total))
+        self.label_info.setText(cons_value.predict_pictures_info.format(pics_src_path,info_dict['fname'],info_dict['label'],info_dict['num'],total))
         self.label_info.adjustSize()
 
     def ways_clicked(self):
+        # 要先解除绑定
+        self.btn_Start.disconnect()
         if self.tabs_top.group_ways.checkedId()==1:
             self.btn_Start.clicked.connect(self.predict_pictures)
-            self.btn_Stop.setText('pictures')
+
+
         elif self.tabs_top.group_ways.checkedId()==2:
             self.btn_Start.clicked.connect(self.detect_video)
-            self.btn_Stop.setText('video')
+
         else:
             pass
     def start_btn_changed_slot(self):
@@ -263,9 +281,25 @@ class MainWin(QMainWindow):
         elif index==4:
             self.btn_Start.clicked.connect(self.predict_pictures)
         else:
+            self.btn_Start.clicked.connect(self.showPictures)
+    def StopThread(self):
+        msg = QMessageBox.question(self, "警告", "你确定停止任务吗？", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        # 判断消息的返回值
+        if msg == QMessageBox.Yes:
+            if self.detect_video_thread.isRunning():
+                print(1)
+                self.detect_video_thread.quit_()
+            if self.extract_pictures_thread.isRunning():
+                print(2)
+                self.extract_pictures_thread.quit()
+            if self.predict_pics_thread.isRunning():
+                print(3)
+                self.predict_pics_thread.quit_()
+            if self.split_thread.isRunning():
+                print(4)
+                self.split_thread.quit()
+        else:
             pass
-        self.btn_Stop.setText(str(index))
-
 if __name__=='__main__':
     app=QApplication(sys.argv)
     ex=MainWin()

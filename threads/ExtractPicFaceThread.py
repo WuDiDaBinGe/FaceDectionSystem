@@ -5,7 +5,7 @@ from utils import video_frame_save
 
 class ExtractPicFacesThread(QThread):
     split_finish=pyqtSignal(int)
-    def __init__(self,src_path,save_path,f_w,f_h):
+    def __init__(self,src_path=None,save_path=None,f_w=None,f_h=None):
         super().__init__()
         self.src_path=src_path
         self.save_path=save_path

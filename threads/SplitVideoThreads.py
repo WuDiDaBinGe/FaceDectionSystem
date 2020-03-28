@@ -7,7 +7,7 @@ from utils import video_frame_save
 
 class SplitVideoThreads(QThread):
     split_finish=pyqtSignal(int)
-    def __init__(self,src_path,save_path,interval,f_start,f_end,f_w,f_h):
+    def __init__(self,src_path=None,save_path=None,interval=None,f_start=None,f_end=None,f_w=None,f_h=None):
         super().__init__()
         self.video_src_path=src_path
         self.frame_save_path=save_path

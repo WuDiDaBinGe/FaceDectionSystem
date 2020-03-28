@@ -1,6 +1,7 @@
 import cv2
 import os
 import dlib
+import os
 
 srcvideo_path = "Video/data_dst.mp4"
 dstframe_path = "video_frame_save/"
@@ -132,5 +133,5 @@ def extract_faces_from_pictures(pics_path,out_path,pic_width=None,pic_height=Non
     return count
 
 if __name__ =='__main__':
-    video_to_frame(srcvideo_path,dstframe_path,interval,50,100)
-
+    #video_to_frame(srcvideo_path,dstframe_path,interval,50,100)
+    print(os.path.join('C:/Users/len/Desktop/example/','48.avi'))

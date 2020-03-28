@@ -44,7 +44,7 @@ class MyPicturesListWidget(QWidget):
     def update(self,pictures_path):
         self.img_w=self.width()/2.5
         self.img_h=self.img_w/3*2
-        #显示两列图片
+        # 显示两列图片
         self.iconlist.setIconSize(QSize(self.img_w, self.img_h))
         # 先清空列表，再添加
         self.iconlist.clear()

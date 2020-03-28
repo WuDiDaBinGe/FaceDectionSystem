@@ -4,8 +4,16 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 class MyTabs(QTabWidget):
+
     def __init__(self,parent=None):
         super(MyTabs, self).__init__(parent)
+        self.input_pictures_path=None
+        self.video_in_path=None
+        self.model_path=None
+        self.frame_save_path=None
+        self.out_result_path=None
+        self.pics_extract_path=None
+
 
         # 创建选项卡小控件窗口
         self.tab_input_video=QWidget()
@@ -57,10 +65,7 @@ class MyTabs(QTabWidget):
         self.line_picture_file_path.setObjectName('no_border_lineEdit')
         self.line_picture_file_path.setReadOnly(True)
 
-        self.btn_out_result_file = QPushButton('修改输出路径..')
-        self.line_outresult__file_path = QLineEdit()
-        self.line_outresult__file_path.setObjectName('no_border_lineEdit')
-        self.line_outresult__file_path.setReadOnly(True)
+
         # 水平布局添加单选按钮
         hbox_input = QHBoxLayout()
         hbox_input.addWidget(self.btn_open_pictures_file)
@@ -68,15 +73,8 @@ class MyTabs(QTabWidget):
         hbox_input.addWidget(self.line_picture_file_path)
         hbox_input.setStretchFactor(self.line_picture_file_path, 8)
 
-        hbox_out = QHBoxLayout()
-        hbox_out.addWidget(self.btn_out_result_file)
-        hbox_out.setStretchFactor(self.btn_out_result_file, 2)
-        hbox_out.addWidget(self.line_outresult__file_path)
-        hbox_out.setStretchFactor(self.line_outresult__file_path, 8)
-
         # 表单布局添加控件
         layout.addRow(QLabel('选择图片地址'),hbox_input)
-        layout.addRow('预测结果输出地址',hbox_out)
 
         # 设置标题与布局
         self.setTabText(2,'输入图片')
@@ -150,19 +148,48 @@ class MyTabs(QTabWidget):
         # 设置小标题与布局方式
         self.setTabText(3, '提取人脸图片')
         self.tab_extract_pictures.setLayout(layout)
+
     def Model_Select_UI(self):
         # 表单布局
         layout = QFormLayout()
         self.btn_in_model = QPushButton('选择模型..')
-        self.label_in_model_path = QLabel()
+        self.line_in_model_path = QLineEdit()
+        self.line_in_model_path.setObjectName("no_border_lineEdit")
+        self.line_in_model_path.setReadOnly(True)
 
         hbox_input_video = QHBoxLayout()
         hbox_input_video.addWidget(self.btn_in_model)
         hbox_input_video.setStretchFactor(self.btn_in_model, 2)
-        hbox_input_video.addWidget(self.label_in_model_path)
-        hbox_input_video.setStretchFactor(self.label_in_model_path, 8)
+        hbox_input_video.addWidget(self.line_in_model_path)
+        hbox_input_video.setStretchFactor(self.line_in_model_path, 8)
+
+        self.btn_out_result_file = QPushButton('修改输出路径')
+        self.line_outresult_file_path = QLineEdit()
+        self.line_outresult_file_path.setObjectName('no_border_lineEdit')
+        self.line_outresult_file_path.setReadOnly(True)
+        hbox_out = QHBoxLayout()
+        hbox_out.addWidget(self.btn_out_result_file)
+        hbox_out.setStretchFactor(self.btn_out_result_file, 2)
+        hbox_out.addWidget(self.line_outresult_file_path)
+        hbox_out.setStretchFactor(self.line_outresult_file_path, 8)
+
+        hbox_choice_ways=QHBoxLayout()
+        self.qbutton_predict_pictures=QRadioButton('预测图片',self)
+        self.qbutton_predict_video=QRadioButton('预测视频',self)
+        hbox_choice_ways.addWidget(self.qbutton_predict_pictures)
+        hbox_choice_ways.setStretchFactor(self.qbutton_predict_pictures,2)
+        hbox_choice_ways.addWidget(self.qbutton_predict_video)
+        hbox_choice_ways.setStretchFactor(self.qbutton_predict_video, 2)
+        hbox_choice_ways.addStretch(6)
+
+        self.group_ways=QButtonGroup()
+        self.group_ways.addButton(self.qbutton_predict_pictures,1)
+        self.group_ways.addButton(self.qbutton_predict_video,2)
+
 
         layout.addRow('选择模型', hbox_input_video)
+        layout.addRow('选择输出路径',hbox_out)
+        layout.addRow('选择预测方式',hbox_choice_ways)
 
         # 设置小标题与布局方式
         self.setTabText(4, '模型选择')
@@ -178,6 +205,7 @@ class MyTabs(QTabWidget):
         self.btn_in_video.clicked.connect(self.select_in_video)
         self.btn_frame_save_path.clicked.connect(self.select_frame_save_path)
         self.btn_save_newpic_path.clicked.connect(self.select_extract_pictures)
+        self.btn_in_model.clicked.connect(self.select_model_path)
 
     def select_in_video(self):
         video_in=QFileDialog.getOpenFileName(self,'选择视频','./','*.mp4')
@@ -189,17 +217,15 @@ class MyTabs(QTabWidget):
     def open_pics_file(self):
         file_path=QFileDialog.getExistingDirectory(self,'选择输入图片文件夹','/')
         self.line_picture_file_path.setText(file_path)
-        self.line_outresult__file_path.setText(file_path)
         if file_path==None:
             QMessageBox.information(self,'提示','文件为空，请重新选择')
         else:
             self.input_pictures_path=file_path
-            self.out_result_path=file_path
 
     def update_out_result_path(self):
 
         file_path = QFileDialog.getExistingDirectory(self, '选择输出文件路径', '/')
-        self.line_outresult__file_path.setText(file_path)
+        self.line_outresult_file_path.setText(file_path)
         if file_path == None:
             QMessageBox.information(self, '提示', '文件为空，请重新选择')
         else:
@@ -220,6 +246,14 @@ class MyTabs(QTabWidget):
             QMessageBox.information(self, '提示', '文件为空，请重新选择')
         else:
             self.pics_extract_path = save_path
+
+    def select_model_path(self):
+        save_path = QFileDialog.getExistingDirectory(self, '选择模型路径', '/')
+        self.line_in_model_path.setText(save_path)
+        if save_path == None:
+            QMessageBox.information(self, '提示', '文件为空，请重新选择')
+        else:
+            self.model_path = save_path
 
 if __name__ == '__main__':
     app=QApplication(sys.argv)

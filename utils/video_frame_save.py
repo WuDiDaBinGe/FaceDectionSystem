@@ -2,6 +2,7 @@ import cv2
 import os
 import dlib
 import os
+from utils import cosnt_value
 
 srcvideo_path = "Video/data_dst.mp4"
 dstframe_path = "video_frame_save/"
@@ -112,7 +113,7 @@ def extract_faces_from_pictures(pics_path,out_path,pic_width=None,pic_height=Non
     for f in files:
         pic_name=f.split('.')[0]
         pic_type=f.split('.')[-1]
-        if pic_type  not in ['jpg','png']:
+        if pic_type  not in cosnt_value.accept_pictures_type:
             continue
         path=os.path.join(pics_path,f)
         picture=cv2.imread(path)

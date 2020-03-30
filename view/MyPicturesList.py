@@ -4,6 +4,7 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QWidget, QApplication, QListWidget, QListView, QHBoxLayout, QListWidgetItem
 import os
+from utils import cosnt_value
 
 pictures_path="F:\\dataset\\example"
 class MyPicturesListWidget(QWidget):
@@ -18,7 +19,7 @@ class MyPicturesListWidget(QWidget):
 
         self.iconlist = QListWidget()
         self.iconlist.setViewMode(QListView.IconMode)
-        self.iconlist.setSpacing(2)
+        self.iconlist.setSpacing(8)
 
         self.iconlist.setMovement(False)
         self.iconlist.setResizeMode(QListView.Adjust)
@@ -33,7 +34,7 @@ class MyPicturesListWidget(QWidget):
         files = os.listdir(pictures_path)
         for f1 in files:
             type_class=f1.split('.')[-1]
-            if type_class not in ['jpg','png']:
+            if type_class not in cosnt_value.accept_pictures_type:
                 continue
             path=os.path.join(pictures_path,f1)
             pix1 = QPixmap(path)

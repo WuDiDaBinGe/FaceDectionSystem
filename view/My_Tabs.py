@@ -189,6 +189,8 @@ class MyTabs(QTabWidget):
 
         hbox_choice_ways=QHBoxLayout()
         self.qbutton_predict_pictures=QRadioButton('预测图片',self)
+        # 默认为预测图片
+        self.qbutton_predict_pictures.setChecked(True)
         self.qbutton_predict_video=QRadioButton('预测视频',self)
         hbox_choice_ways.addWidget(self.qbutton_predict_pictures)
         hbox_choice_ways.setStretchFactor(self.qbutton_predict_pictures,2)
@@ -199,6 +201,7 @@ class MyTabs(QTabWidget):
         self.group_ways=QButtonGroup()
         self.group_ways.addButton(self.qbutton_predict_pictures,1)
         self.group_ways.addButton(self.qbutton_predict_video,2)
+
 
 
         layout.addRow('选择模型', hbox_input_video)

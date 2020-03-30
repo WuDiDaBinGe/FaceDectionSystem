@@ -1,6 +1,5 @@
 import os
 import numpy as np
-from PIL import Image as pil_image
 from models.research.deeplab.core import xception
 from utils.cosnt_value import IMG_SIZE,NUM_CLASS
 import tensorflow as tf

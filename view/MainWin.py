@@ -2,6 +2,7 @@ import sys
 import matplotlib
 matplotlib.use('Qt5Agg')
 # 使用 matplotlib中的FigureCanvas (在使用 Qt5 Backends中 FigureCanvas继承自QtWidgets.QWidget)
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import *
@@ -73,7 +74,9 @@ class MainWin(QMainWindow):
         self.convas=FigureCanvas(self.figure)
 
         # 表格数据
-        self.table_result=QFrame()
+        self.table_result=QTableWidget()
+        self.table_result.setColumnCount(2)
+        self.table_result.setHorizontalHeaderLabels(['检测序列','检测结果'])
         self.table_result.setObjectName("table_result")
 
         hbox_mid_right_result=QHBoxLayout()
@@ -221,7 +224,7 @@ class MainWin(QMainWindow):
     def split_video_finished(self,dict):
         self.label_info.setText(cons_value.split_video_finished.format(dict['src'], dict['out'],
                                                                     dict['count']))
-        #self.pbar.setValue(self.pbar.maximum())
+
         self.label_info.adjustSize()
         if dict['out']:
             self.list_pictures.update(dict['out'])
@@ -257,12 +260,28 @@ class MainWin(QMainWindow):
 
             self.detect_video_thread.detect_video_finished.connect(self.detect_video_info)
             self.detect_video_thread.all_finished.connect(self.detect_video_finished)
+            self.detect_video_thread.model_error.connect(self.model_error)
             self.detect_video_thread.start()
             self.label_info.setText('正在检测视频中......')
             self.label_info.adjustSize()
         else:
             QMessageBox.information(self, '请检查', '输入/输出视频和模型路径不能为空！')
     def detect_video_finished(self,result):
+        # 表格显示结果
+        frame_list=result['x']
+        result_list=result['y']
+        result_list=['fake' if x==0 else 'real' for x in result_list]
+        row_count=np.size(result['x'])
+        # 清除表格内容
+        self.table_result.clearContents()
+        self.table_result.setHorizontalHeaderLabels(['帧序列','检测结果'])
+        self.table_result.setRowCount(row_count)
+        for i in range(row_count):
+            index_item=QTableWidgetItem(str(frame_list[i]))
+            result_item=QTableWidgetItem(result_list[i])
+            self.table_result.setItem(i,0,index_item)
+            self.table_result.setItem(i,1,result_item)
+
         # 画图
         self.draw_video_result(result)
 
@@ -322,17 +341,34 @@ class MainWin(QMainWindow):
             self.predict_pics_thread=PredictPicturesThread.PredictPicturesThread(pics_src_path, result_save_path, model_path)
             self.predict_pics_thread.piedict_pictures_finished.connect(self.predict_pictures_info)
             self.predict_pics_thread.all_finished.connect(self.predict_pictures_finish)
+            self.predict_pics_thread.model_error.connect(self.model_error)
             self.predict_pics_thread.start()
             self.label_info.setText('正在预测图片中......')
 
         else:
             QMessageBox.information(self, '请检查', '输入图片/输出预测结果文件/模型路径不能为空！')
+
     def predict_pictures_finish(self,info,result):
+
         pics_src_path = self.tabs_top.input_pictures_path
         info_dict=info
         self.label_info.setText(cons_value.predict_pictures_finish.format(pics_src_path,info_dict['out'],info_dict['num']))
         self.label_info.adjustSize()
+        # 画图
         self.draw_pictures_result(result)
+        # 显示表格结果
+        # 清除表格内容
+        self.table_result.clearContents()
+        fname_list = result['f_name']
+        result_list = result['labels']
+        row_count = np.size(result['x'])
+        self.table_result.setHorizontalHeaderLabels(['文件名','结果'])
+        self.table_result.setRowCount(row_count)
+        for i in range(row_count):
+            index_item = QTableWidgetItem(fname_list[i])
+            result_item = QTableWidgetItem(result_list[i])
+            self.table_result.setItem(i, 0, index_item)
+            self.table_result.setItem(i, 1, result_item)
 
     def predict_pictures_info(self,info):
         pics_src_path = self.tabs_top.input_pictures_path
@@ -376,15 +412,20 @@ class MainWin(QMainWindow):
             if self.split_thread.isRunning():
                 print(4)
                 self.split_thread.quit_()
+            self.label_info.setText('停止了所有进程！')
+            self.label_info.adjustSize()
         else:
             pass
+    def model_error(self):
+        QMessageBox.information(self, '请检查', '模型出错！')
     def draw_video_result(self,result):
         if self.is_draw:
             self.reset_draw()
         self.ax1.scatter(result['x'], result['y'])
         names = ['fake', 'real']
         values = [result['fake_num'], result['real_num']]
-        self.ax2.bar(names, values)
+        a=self.ax2.bar(names, values)
+        self.autolabel(a)
         self.convas.draw()
         self.is_draw=True
 
@@ -394,9 +435,17 @@ class MainWin(QMainWindow):
         self.ax1.scatter(result['x'], result['y'])
         names = ['fake', 'real']
         values = [result['fake_num'], result['real_num']]
-        self.ax2.bar(names, values)
+        a=self.ax2.bar(names, values)
+        self.autolabel(a)
         self.convas.draw()
         self.is_draw = True
+
+    # 定义函数来显示柱状上的数值
+    def autolabel(self,rects):
+        for rect in rects:
+            height = rect.get_height()
+            self.ax2.text(rect.get_x() + rect.get_width() / 2.-0.1, 1.03 * height, '%s' % float(height))
+
 
     def reset_draw(self):
         try:

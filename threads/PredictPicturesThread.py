@@ -5,13 +5,13 @@ import numpy as np
 import tensorflow as tf
 from models.research.deeplab.core import xception
 import os
-from utils import predict_pictures_with_model
 from utils import tools
 import utils.cosnt_value as cosnt_value
 
 class PredictPicturesThread(QThread):
     piedict_pictures_finished=pyqtSignal(dict)
     all_finished=pyqtSignal(dict,dict)
+    model_error=pyqtSignal()
     fake_num=0
     real_num=0
     def __init__(self,src_path=None,save_path=None,model_path=None):
@@ -24,63 +24,71 @@ class PredictPicturesThread(QThread):
 
 
     def run(self):
-        self.model_init(self.model_path)
-        print('模型加载完成')
-
-        predicts_label=[]
-        predicts=[]
-        fname=[]
-        # 回传的字典信息
-        dict_info={}
-        result_info={}
-        if os.path.exists(self.src_path):
-            files = os.listdir(self.src_path)
-            num=1
-            pic_count = 0
-            for f in files:
-                pic_type=f.split('.')
-                if pic_type[-1] not in cosnt_value.accept_pictures_type:
+        if self.model_init(self.model_path):
+            print('模型加载完成')
+            predicts_label=[]
+            predicts=[]
+            fname=[]
+            # 回传的字典信息
+            dict_info={}
+            result_info={}
+            if os.path.exists(self.src_path):
+                files = os.listdir(self.src_path)
+                num=1
+                pic_count = 0
+                for f in files:
+                    pic_type=f.split('.')
+                    if pic_type[-1] not in cosnt_value.accept_pictures_type:
+                        num+=1
+                        continue
+                    path = os.path.join(self.src_path, f)
+                    predict = self.predict_with_model(path)
+                    if predict==1:
+                        self.real_num+=1
+                    else:
+                        self.fake_num+=1
+                    predicts.append(predict)
+                    label='real' if predict==1 else 'fake'
+                    predicts_label.append(label)
+                    fname.append(f)
+                    print(predict)
+                    dict_info['fname']=f
+                    dict_info['label']=label
+                    dict_info['num']=num
+                    self.piedict_pictures_finished.emit(dict_info)
                     num+=1
-                    continue
-                path = os.path.join(self.src_path, f)
-                predict = self.predict_with_model(path)
-                if predict==1:
-                    self.real_num+=1
-                else:
-                    self.fake_num+=1
-                predicts.append(predict)
-                label='real' if predict==1 else 'fake'
-                predicts_label.append(label)
-                fname.append(f)
-                print(predict)
-                dict_info['fname']=f
-                dict_info['label']=label
-                dict_info['num']=num
-                self.piedict_pictures_finished.emit(dict_info)
-                num+=1
-                pic_count += 1
-                if self.flag_run==False:
-                    break
-            predicts_label=np.array(predicts_label)
-            fname=np.array(fname)
-            data=np.column_stack((fname,predicts_label))
-            data=pd.DataFrame(data,columns=['pictures_name','predictions'])
-            data.to_csv(self.save_path+'/predict_pics_result.csv')
-            dict_info['out']=self.save_path+'/predict_pics_result.csv'
+                    pic_count += 1
+                    if self.flag_run==False:
+                        break
 
-            result_info['fake_num']=self.fake_num
-            result_info['real_num']=self.real_num
-            result_info['y']=np.array(predicts)
-            result_info['x']=np.arange(1,pic_count+1)
-            self.all_finished.emit(dict_info,result_info)
+                result_info['f_name']=fname
+                result_info['labels']=predicts_label
+                result_info['fake_num']=self.fake_num
+                result_info['real_num']=self.real_num
+                result_info['y']=np.array(predicts)
+                result_info['x']=np.arange(1,pic_count+1)
+
+
+                # 写文件
+                predicts_label = np.array(predicts_label)
+                fname = np.array(fname)
+                data = np.column_stack((fname, predicts_label))
+                data = pd.DataFrame(data, columns=['pictures_name', 'predictions'])
+                data.to_csv(self.save_path + '/predict_pics_result.csv')
+                dict_info['out'] = self.save_path + '/predict_pics_result.csv'
+                # 发送完成信号
+                self.all_finished.emit(dict_info, result_info)
+            else:
+                print('路径错误')
         else:
-            print('路径错误')
+            self.model_error.emit()
 
     def __del__(self):
         self.wait()
     def quit_(self):
         self.flag_run=False
-
+    def start_(self):
+        self.flag_run=True
     def model_init(self,model_path):
         self.x_ = tf.placeholder(tf.float32, [None, cosnt_value.IMG_SIZE, cosnt_value.IMG_SIZE, 3])
 
@@ -97,7 +105,11 @@ class PredictPicturesThread(QThread):
         self.sess.run(init_op)
         ckpt = tf.train.get_checkpoint_state(model_path)
         if ckpt and ckpt.model_checkpoint_path:
+            print(ckpt.model_checkpoint_path)
             saver.restore(self.sess, ckpt.model_checkpoint_path)
+            return True
+        else:
+            return False
 
     def predict_with_model(self,path):
         image = tools.load_img(path)

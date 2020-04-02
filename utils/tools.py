@@ -1,5 +1,6 @@
 import cv2
-import skimage
+import skimage.io
+import skimage.transform
 from utils import cosnt_value
 import numpy as np
 import os

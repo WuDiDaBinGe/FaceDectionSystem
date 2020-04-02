@@ -95,6 +95,8 @@ class SplitVideoThreads(QThread):
 
     def quit_(self):
         self.run_flag=False
+    def start_(self):
+        self.run_flag=True
 
 
 

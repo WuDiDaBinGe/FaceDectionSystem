@@ -1,9 +1,9 @@
+import os
 import sys
-
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QWidget, QApplication, QListWidget, QListView, QHBoxLayout, QListWidgetItem
-import os
 from utils import cosnt_value
 
 pictures_path="F:\\dataset\\example"

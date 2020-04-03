@@ -1,6 +1,8 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 import cv2
 import dlib
-import os
 from utils import cosnt_value
 from PyQt5.QtCore import *
 from utils import tools

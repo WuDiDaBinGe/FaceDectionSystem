@@ -1,6 +1,8 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from PyQt5.QtCore import *
 from utils import tools
-import os
 from models.research.deeplab.core import xception
 from utils.cosnt_value import IMG_SIZE,NUM_CLASS
 import tensorflow as tf

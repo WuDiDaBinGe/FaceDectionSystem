@@ -1,4 +1,6 @@
+import os
 import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 import matplotlib
 matplotlib.use('Qt5Agg')
 # 使用 matplotlib中的FigureCanvas (在使用 Qt5 Backends中 FigureCanvas继承自QtWidgets.QWidget)

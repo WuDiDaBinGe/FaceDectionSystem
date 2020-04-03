@@ -1,9 +1,12 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 import cv2
 import skimage.io
 import skimage.transform
 from utils import cosnt_value
 import numpy as np
-import os
+
 def get_split_video_total(startframe,endframe,interval):
     endframe=endframe-startframe
     return endframe//interval+1

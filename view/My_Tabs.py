@@ -1,8 +1,8 @@
+import os
 import sys
-from PyQt5.QtCore import *
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
 class MyTabs(QTabWidget):
 
     def __init__(self,parent=None):

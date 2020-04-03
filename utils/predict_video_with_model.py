@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 import numpy as np
 from models.research.deeplab.core import xception
 from utils.cosnt_value import IMG_SIZE,NUM_CLASS

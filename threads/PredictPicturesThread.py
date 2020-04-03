@@ -1,10 +1,11 @@
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from PyQt5.QtCore import *
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 from models.research.deeplab.core import xception
-import os
 from utils import tools
 import utils.cosnt_value as cosnt_value
 

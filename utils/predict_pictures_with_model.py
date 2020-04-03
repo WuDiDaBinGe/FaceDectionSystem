@@ -1,9 +1,11 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 import tensorflow as tf
 import skimage.io
 import skimage.transform
 from models.research.deeplab.core import xception
 from utils.cosnt_value import IMG_SIZE,NUM_CLASS
-import os
 
 def load_img(path):
     print(path)
